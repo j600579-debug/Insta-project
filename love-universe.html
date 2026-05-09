@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Universe ❤️</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --neon-pink:#ff2d78;--neon-purple:#b44fff;--neon-blue:#00d4ff;--neon-red:#ff1a4b;
+  --deep-space:#050010;--space-mid:#0a0025;--glow-pink:rgba(255,45,120,0.6);
+  --glow-purple:rgba(180,79,255,0.6);--glow-blue:rgba(0,212,255,0.5);
+}
+html{scroll-behavior:smooth;}
+body{background:#050010;color:#fff;font-family:'Rajdhani',sans-serif;overflow-x:hidden;cursor:none;}
+
+/* Custom cursor */
+#cursor{position:fixed;width:20px;height:20px;border:2px solid var(--neon-pink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen;}
+#cursor-trail{position:fixed;width:8px;height:8px;background:var(--neon-pink);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .1s,top .1s;opacity:.6;}
+
+/* Canvas background */
+#canvas-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* Sections */
+.section{position:relative;min-height:100vh;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+
+/* Glassmorphism */
+.glass{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;}
+.glass-pink{background:rgba(255,45,120,0.05);border:1px solid rgba(255,45,120,0.2);backdrop-filter:blur(12px);border-radius:20px;}
+
+/* Neon text */
+.neon-text{font-family:'Orbitron',monospace;text-shadow:0 0 10px currentColor,0 0 20px currentColor,0 0 40px currentColor;}
+.neon-pink{color:var(--neon-pink);text-shadow:0 0 10px var(--neon-pink),0 0 30px var(--neon-pink),0 0 60px var(--neon-pink);}
+.neon-purple{color:var(--neon-purple);text-shadow:0 0 10px var(--neon-purple),0 0 30px var(--neon-purple),0 0 60px var(--neon-purple);}
+.neon-blue{color:var(--neon-blue);text-shadow:0 0 10px var(--neon-blue),0 0 30px var(--neon-blue),0 0 60px var(--neon-blue);}
+
+/* INTRO */
+#intro{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;background:#050010;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.5s ease;}
+#intro.fade-out{opacity:0;pointer-events:none;}
+.intro-title{font-family:'Orbitron',monospace;font-size:clamp(1.2rem,4vw,2.2rem);text-align:center;color:#fff;letter-spacing:3px;animation:titleFloat 3s ease-in-out infinite;}
+.intro-sub{font-family:'Dancing Script',cursive;font-size:clamp(1rem,3vw,1.8rem);color:var(--neon-pink);margin-top:1rem;animation:fadeGlow 2s ease-in-out infinite alternate;}
+#heart-svg{width:min(300px,60vw);height:min(300px,60vw);margin-bottom:2rem;animation:heartPulse 1.5s ease-in-out infinite;}
+.enter-btn{margin-top:2rem;padding:14px 40px;background:transparent;border:2px solid var(--neon-pink);color:var(--neon-pink);font-family:'Orbitron',monospace;font-size:1rem;letter-spacing:3px;cursor:pointer;border-radius:50px;transition:all .3s;text-shadow:0 0 10px var(--neon-pink);box-shadow:0 0 20px rgba(255,45,120,0.3),inset 0 0 20px rgba(255,45,120,0.05);}
+.enter-btn:hover{background:rgba(255,45,120,0.1);box-shadow:0 0 40px rgba(255,45,120,0.6),inset 0 0 30px rgba(255,45,120,0.1);transform:scale(1.05);}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(5,0,16,0.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,120,0.2);transform:translateY(-100%);transition:transform .5s ease;}
+#nav.visible{transform:translateY(0);}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--neon-pink);text-shadow:0 0 15px var(--neon-pink);}
+.nav-links{display:flex;gap:1.5rem;flex-wrap:wrap;}
+.nav-link{font-size:.75rem;color:rgba(255,255,255,0.6);cursor:pointer;transition:color .3s;font-family:'Orbitron',monospace;letter-spacing:2px;padding:4px 8px;border-radius:4px;}
+.nav-link:hover{color:var(--neon-pink);text-shadow:0 0 10px var(--neon-pink);}
+
+/* MENU */
+#menu-section{padding-top:6rem;}
+.menu-title{font-family:'Orbitron',monospace;font-size:clamp(1.5rem,5vw,3rem);text-align:center;margin-bottom:3rem;}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem;max-width:900px;width:100%;}
+.menu-card{padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:all .4s;border-radius:20px;position:relative;overflow:hidden;}
+.menu-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,45,120,0.1),transparent 70%);opacity:0;transition:opacity .3s;}
+.menu-card:hover::before{opacity:1;}
+.menu-card:hover{transform:translateY(-10px) scale(1.05);border-color:var(--neon-pink)!important;box-shadow:0 20px 60px rgba(255,45,120,0.3);}
+.menu-emoji{font-size:2.5rem;display:block;margin-bottom:.8rem;filter:drop-shadow(0 0 10px rgba(255,45,120,0.8));}
+.menu-label{font-family:'Orbitron',monospace;font-size:.75rem;letter-spacing:2px;color:rgba(255,255,255,0.8);}
+
+/* SECTIONS common */
+.section-title{font-family:'Orbitron',monospace;font-size:clamp(1.5rem,4vw,2.5rem);text-align:center;margin-bottom:2rem;}
+.section-inner{max-width:900px;width:100%;}
+.back-btn{display:inline-flex;align-items:center;gap:.5rem;padding:10px 24px;background:transparent;border:1px solid rgba(255,45,120,0.4);color:rgba(255,255,255,0.6);font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:2px;cursor:pointer;border-radius:50px;transition:all .3s;margin-bottom:2rem;}
+.back-btn:hover{border-color:var(--neon-pink);color:var(--neon-pink);}
+
+/* LOVE CHAT */
+#chat-section .chat-container{width:100%;max-width:500px;height:65vh;max-height:600px;display:flex;flex-direction:column;border-radius:24px;overflow:hidden;border:1px solid rgba(255,45,120,0.3);box-shadow:0 0 60px rgba(255,45,120,0.15);}
+.chat-header{padding:1rem 1.5rem;background:rgba(255,45,120,0.08);display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,45,120,0.2);}
+.chat-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 0 20px rgba(255,45,120,0.5);}
+.chat-name{font-family:'Orbitron',monospace;font-size:.85rem;color:#fff;}
+.chat-status{font-size:.7rem;color:var(--neon-blue);margin-top:2px;}
+.chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:1rem;scrollbar-width:thin;scrollbar-color:rgba(255,45,120,0.3) transparent;}
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-track{background:transparent;}
+.chat-messages::-webkit-scrollbar-thumb{background:rgba(255,45,120,0.3);border-radius:2px;}
+.msg{max-width:75%;animation:msgIn .4s cubic-bezier(0.175,0.885,0.32,1.275);}
+.msg.incoming{align-self:flex-start;}
+.msg.outgoing{align-self:flex-end;}
+.msg-bubble{padding:.7rem 1rem;border-radius:18px;font-size:.9rem;line-height:1.5;position:relative;}
+.msg.incoming .msg-bubble{background:rgba(180,79,255,0.15);border:1px solid rgba(180,79,255,0.3);border-bottom-left-radius:4px;color:#fff;}
+.msg.outgoing .msg-bubble{background:rgba(255,45,120,0.2);border:1px solid rgba(255,45,120,0.4);border-bottom-right-radius:4px;color:#fff;}
+.msg-time{font-size:.65rem;color:rgba(255,255,255,0.4);margin-top:4px;text-align:right;}
+.typing-indicator{align-self:flex-start;display:flex;align-items:center;gap:4px;padding:.7rem 1rem;background:rgba(180,79,255,0.1);border:1px solid rgba(180,79,255,0.2);border-radius:18px;border-bottom-left-radius:4px;}
+.typing-dot{width:8px;height:8px;background:var(--neon-purple);border-radius:50%;animation:typingBounce 1.2s ease-in-out infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+.chat-input-area{padding:1rem;background:rgba(5,0,16,0.9);border-top:1px solid rgba(255,45,120,0.2);display:flex;gap:.8rem;align-items:flex-end;}
+.chat-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,45,120,0.3);color:#fff;padding:.7rem 1rem;border-radius:20px;font-family:'Rajdhani',sans-serif;font-size:.95rem;outline:none;resize:none;max-height:100px;transition:border-color .3s;}
+.chat-input:focus{border-color:var(--neon-pink);}
+.chat-input::placeholder{color:rgba(255,255,255,0.3);}
+.chat-send{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:transform .2s,box-shadow .2s;box-shadow:0 0 20px rgba(255,45,120,0.4);}
+.chat-send:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(255,45,120,0.6);}
+.chat-ending{text-align:center;padding:2rem;animation:fadeGlow 2s ease-in-out infinite alternate;display:none;}
+.chat-ending-text{font-family:'Dancing Script',cursive;font-size:1.8rem;color:var(--neon-pink);}
+
+/* MEMORIES */
+.memories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;width:100%;max-width:900px;}
+.memory-card{aspect-ratio:3/4;background:rgba(255,255,255,0.03);border:1px solid rgba(255,45,120,0.2);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;cursor:pointer;transition:all .4s;animation:floatCard 4s ease-in-out infinite;position:relative;overflow:hidden;}
+.memory-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,45,120,0.08),transparent 60%);pointer-events:none;}
+.memory-card:hover{transform:translateY(-15px) rotateY(5deg) scale(1.03);border-color:var(--neon-pink);box-shadow:0 30px 80px rgba(255,45,120,0.3);}
+.memory-card:nth-child(2){animation-delay:.5s;}
+.memory-card:nth-child(3){animation-delay:1s;}
+.memory-card:nth-child(4){animation-delay:1.5s;}
+.memory-card:nth-child(5){animation-delay:2s;}
+.memory-card:nth-child(6){animation-delay:2.5s;}
+.memory-icon{font-size:3rem;margin-bottom:1rem;filter:drop-shadow(0 0 15px rgba(255,45,120,0.8));}
+.memory-title{font-family:'Orbitron',monospace;font-size:.75rem;letter-spacing:2px;color:rgba(255,255,255,0.8);text-align:center;margin-bottom:.5rem;}
+.memory-desc{font-size:.8rem;color:rgba(255,255,255,0.5);text-align:center;}
+
+/* TIMELINE */
+.timeline{position:relative;max-width:700px;width:100%;}
+.timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent,var(--neon-pink),var(--neon-purple),var(--neon-blue),transparent);transform:translateX(-50%);box-shadow:0 0 15px rgba(255,45,120,0.5);}
+.timeline-item{display:flex;align-items:center;margin-bottom:3rem;position:relative;}
+.timeline-item:nth-child(odd){flex-direction:row-reverse;}
+.timeline-content{width:calc(50% - 40px);padding:1.2rem;transition:all .4s;}
+.timeline-item:nth-child(odd) .timeline-content{text-align:right;}
+.timeline-content:hover{transform:scale(1.05);border-color:var(--neon-pink)!important;}
+.timeline-dot{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;z-index:2;position:relative;box-shadow:0 0 30px rgba(255,45,120,0.6);margin:0 1rem;}
+.timeline-event{font-family:'Orbitron',monospace;font-size:.8rem;color:var(--neon-pink);margin-bottom:.3rem;}
+.timeline-desc{font-size:.85rem;color:rgba(255,255,255,0.6);}
+
+/* PHOTO GALLERY */
+.gallery-tunnel{perspective:800px;width:100%;max-width:900px;height:500px;position:relative;overflow:hidden;}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;width:100%;max-width:900px;}
+.photo-frame{aspect-ratio:1;background:rgba(255,255,255,0.03);border:2px solid rgba(255,45,120,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;transition:all .4s;position:relative;overflow:hidden;}
+.photo-frame::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,45,120,0.05),rgba(180,79,255,0.05));opacity:0;transition:opacity .3s;}
+.photo-frame:hover::before{opacity:1;}
+.photo-frame:hover{transform:scale(1.08) rotateZ(2deg);border-color:var(--neon-pink);box-shadow:0 0 40px rgba(255,45,120,0.4);}
+.photo-label{position:absolute;bottom:.5rem;left:0;right:0;text-align:center;font-size:.65rem;color:rgba(255,255,255,0.5);font-family:'Orbitron',monospace;letter-spacing:1px;}
+
+/* MUSIC */
+.music-player{max-width:500px;width:100%;padding:2rem;text-align:center;}
+.visualizer{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:80px;margin:2rem 0;}
+.bar{width:6px;background:linear-gradient(to top,var(--neon-pink),var(--neon-purple));border-radius:3px;animation:barDance 1s ease-in-out infinite;}
+.bar:nth-child(2){animation-delay:.1s;height:40%;}
+.bar:nth-child(3){animation-delay:.2s;height:70%;}
+.bar:nth-child(4){animation-delay:.3s;height:50%;}
+.bar:nth-child(5){animation-delay:.4s;height:90%;}
+.bar:nth-child(6){animation-delay:.5s;height:60%;}
+.bar:nth-child(7){animation-delay:.6s;height:80%;}
+.bar:nth-child(8){animation-delay:.7s;height:45%;}
+.bar:nth-child(9){animation-delay:.8s;height:75%;}
+.bar:nth-child(10){animation-delay:.9s;height:55%;}
+.bar:nth-child(11){animation-delay:.05s;height:65%;}
+.bar:nth-child(12){animation-delay:.15s;height:35%;}
+.music-controls{display:flex;justify-content:center;gap:1.5rem;margin-top:1.5rem;}
+.music-btn{width:50px;height:50px;border-radius:50%;background:rgba(255,45,120,0.1);border:1px solid rgba(255,45,120,0.3);color:var(--neon-pink);font-size:1.2rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;}
+.music-btn:hover{background:rgba(255,45,120,0.2);box-shadow:0 0 20px rgba(255,45,120,0.4);}
+.track-info{margin-top:1.5rem;}
+.track-name{font-family:'Orbitron',monospace;font-size:1rem;color:var(--neon-pink);margin-bottom:.3rem;}
+.track-artist{font-size:.85rem;color:rgba(255,255,255,0.5);}
+.progress-bar{height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:1.5rem;overflow:hidden;}
+.progress-fill{height:100%;width:0%;background:linear-gradient(to right,var(--neon-pink),var(--neon-purple));border-radius:2px;animation:progressPlay 30s linear infinite;}
+
+/* QUOTES */
+.quotes-display{max-width:600px;width:100%;text-align:center;}
+.quote-text{font-family:'Dancing Script',cursive;font-size:clamp(1.5rem,4vw,2.5rem);line-height:1.5;margin-bottom:1.5rem;min-height:120px;display:flex;align-items:center;justify-content:center;}
+.quote-nav{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;}
+.quote-btn{padding:10px 24px;background:transparent;border:1px solid rgba(255,45,120,0.4);color:rgba(255,255,255,0.7);font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:2px;cursor:pointer;border-radius:50px;transition:all .3s;}
+.quote-btn:hover{border-color:var(--neon-pink);color:var(--neon-pink);box-shadow:0 0 20px rgba(255,45,120,0.3);}
+.quote-dots{display:flex;gap:.5rem;justify-content:center;margin-top:1rem;}
+.q-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all .3s;cursor:pointer;}
+.q-dot.active{background:var(--neon-pink);box-shadow:0 0 10px var(--neon-pink);}
+
+/* QUIZ */
+.quiz-container{max-width:600px;width:100%;}
+.quiz-question{font-size:1.3rem;text-align:center;margin-bottom:2rem;color:#fff;line-height:1.6;}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.quiz-option{padding:1rem;text-align:center;cursor:pointer;transition:all .3s;border-radius:12px;}
+.quiz-option:hover{transform:scale(1.05);}
+.quiz-option.selected{border-color:var(--neon-pink)!important;background:rgba(255,45,120,0.1)!important;box-shadow:0 0 20px rgba(255,45,120,0.3);}
+.quiz-progress{display:flex;gap:.5rem;justify-content:center;margin-bottom:1.5rem;}
+.q-step{width:30px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;transition:background .3s;}
+.q-step.done{background:var(--neon-pink);}
+.compat-meter{text-align:center;margin-top:2rem;display:none;}
+.compat-bar{height:20px;background:rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;margin:1rem 0;}
+.compat-fill{height:100%;width:0%;background:linear-gradient(to right,var(--neon-pink),var(--neon-purple),var(--neon-blue));border-radius:10px;transition:width 2s ease;}
+.compat-score{font-family:'Orbitron',monospace;font-size:2.5rem;color:var(--neon-pink);}
+.quiz-next{margin-top:1.5rem;width:100%;padding:14px;background:transparent;border:1px solid rgba(255,45,120,0.5);color:#fff;font-family:'Orbitron',monospace;font-size:.8rem;letter-spacing:3px;cursor:pointer;border-radius:50px;transition:all .3s;}
+.quiz-next:hover{background:rgba(255,45,120,0.1);border-color:var(--neon-pink);}
+
+/* PROPOSAL */
+#proposal-section{background:radial-gradient(ellipse at center,rgba(255,45,120,0.08) 0%,transparent 70%);}
+.proposal-heart{font-size:8rem;display:block;text-align:center;animation:proposalBeat 1s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,45,120,0.9));}
+.proposal-text{font-family:'Dancing Script',cursive;font-size:clamp(2rem,6vw,4rem);text-align:center;color:var(--neon-pink);text-shadow:0 0 30px rgba(255,45,120,0.8);margin:2rem 0;}
+.proposal-btns{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;}
+.proposal-btn{padding:18px 40px;font-family:'Orbitron',monospace;font-size:1rem;letter-spacing:3px;cursor:pointer;border-radius:50px;transition:all .4s;}
+.btn-yes{background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));border:none;color:#fff;box-shadow:0 0 30px rgba(255,45,120,0.5);}
+.btn-yes:hover{transform:scale(1.1);box-shadow:0 0 60px rgba(255,45,120,0.8);}
+.btn-forever{background:transparent;border:2px solid var(--neon-blue);color:var(--neon-blue);box-shadow:0 0 20px rgba(0,212,255,0.3);}
+.btn-forever:hover{background:rgba(0,212,255,0.1);box-shadow:0 0 40px rgba(0,212,255,0.5);transform:scale(1.1);}
+.rose-rain{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;}
+.rose{position:absolute;animation:roseFall linear infinite;font-size:1.5rem;}
+
+/* FOREVER ENDING */
+#forever-section{background:radial-gradient(ellipse at center,rgba(0,212,255,0.05),transparent 70%);}
+.forever-text{font-family:'Dancing Script',cursive;font-size:clamp(2rem,6vw,4rem);text-align:center;line-height:1.4;animation:foreverGlow 3s ease-in-out infinite alternate;}
+.souls{display:flex;align-items:center;justify-content:center;gap:2rem;margin:3rem 0;font-size:4rem;}
+.soul{animation:soulFloat 3s ease-in-out infinite;}
+.soul:nth-child(3){animation-delay:1.5s;}
+.soul-merge{animation:soulMerge 3s ease-in-out infinite;}
+.infinity{font-size:3rem;filter:drop-shadow(0 0 20px var(--neon-blue));}
+
+/* Floating particles generated by JS */
+.particle{position:fixed;pointer-events:none;border-radius:50%;z-index:1;animation:particleDrift linear infinite;}
+
+/* Animations */
+@keyframes titleFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+@keyframes fadeGlow{0%{opacity:.7;text-shadow:0 0 20px rgba(255,45,120,0.5);}100%{opacity:1;text-shadow:0 0 40px rgba(255,45,120,1),0 0 80px rgba(255,45,120,0.5);}}
+@keyframes heartPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(255,45,120,0.8));}50%{transform:scale(1.1);filter:drop-shadow(0 0 40px rgba(255,45,120,1));}}
+@keyframes msgIn{0%{opacity:0;transform:translateY(20px) scale(.9);}100%{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes typingBounce{0%,100%{transform:translateY(0);opacity:.5;}50%{transform:translateY(-8px);opacity:1;}}
+@keyframes floatCard{0%,100%{transform:translateY(0) rotateZ(0);}50%{transform:translateY(-12px) rotateZ(1deg);}}
+@keyframes barDance{0%,100%{transform:scaleY(1);}50%{transform:scaleY(.3);}}
+@keyframes progressPlay{0%{width:0%;}100%{width:100%;}}
+@keyframes proposalBeat{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+@keyframes roseFall{0%{transform:translateY(-20px) rotateZ(0);opacity:1;}100%{transform:translateY(110vh) rotateZ(360deg);opacity:0;}}
+@keyframes foreverGlow{0%{color:var(--neon-blue);text-shadow:0 0 30px rgba(0,212,255,0.5);}50%{color:#fff;text-shadow:0 0 30px rgba(255,255,255,0.5);}100%{color:var(--neon-pink);text-shadow:0 0 30px rgba(255,45,120,0.5);}}
+@keyframes soulFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-20px) scale(1.1);}}
+@keyframes soulMerge{0%,100%{transform:scale(1);opacity:.8;}50%{transform:scale(1.3);opacity:1;}}
+@keyframes particleDrift{0%{transform:translateY(0) translateX(0);opacity:.8;}100%{transform:translateY(-100vh) translateX(var(--drift));opacity:0;}}
+@keyframes starTwinkle{0%,100%{opacity:.2;}50%{opacity:1;}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes numberCount{0%{opacity:0;transform:scale(0);}100%{opacity:1;transform:scale(1);}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:rgba(5,0,16,0.5);}
+::-webkit-scrollbar-thumb{background:rgba(255,45,120,0.4);border-radius:3px;}
+
+@media(max-width:768px){
+  #nav .nav-links{display:none;}
+  .timeline::before{left:20px;}
+  .timeline-item,.timeline-item:nth-child(odd){flex-direction:column;padding-left:60px;}
+  .timeline-dot{position:absolute;left:0;}
+  .timeline-content,.timeline-item:nth-child(odd) .timeline-content{width:100%;text-align:left;margin-left:0;}
+  .quiz-options{grid-template-columns:1fr;}
+  .souls{gap:1rem;font-size:2.5rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+<canvas id="canvas-bg"></canvas>
+
+<!-- INTRO -->
+<div id="intro">
+  <svg id="heart-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="hg" cx="50%" cy="50%" r="60%">
+        <stop offset="0%" stop-color="#ff2d78" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#b44fff" stop-opacity=".8"/>
+      </radialGradient>
+      <filter id="hglow">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <g id="heart-particles"></g>
+    <path d="M100,155 C100,155 30,110 30,65 A35,35 0 0,1 100,50 A35,35 0 0,1 170,65 C170,110 100,155 100,155Z" fill="url(#hg)" filter="url(#hglow)" opacity=".9"/>
+  </svg>
+  <div class="intro-title neon-pink">LOVE UNIVERSE ❤️</div>
+  <div class="intro-sub">"Every Love Story Deserves Its Own Universe"</div>
+  <button class="enter-btn" onclick="enterUniverse()">✦ ENTER THE UNIVERSE ✦</button>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">❤️ LOVE.UNIVERSE</div>
+  <div class="nav-links">
+    <span class="nav-link" onclick="showSection('menu')">MENU</span>
+    <span class="nav-link" onclick="showSection('chat')">CHAT</span>
+    <span class="nav-link" onclick="showSection('memories')">MEMORIES</span>
+    <span class="nav-link" onclick="showSection('timeline')">TIMELINE</span>
+    <span class="nav-link" onclick="showSection('gallery')">GALLERY</span>
+    <span class="nav-link" onclick="showSection('music')">MUSIC</span>
+    <span class="nav-link" onclick="showSection('quotes')">QUOTES</span>
+    <span class="nav-link" onclick="showSection('quiz')">QUIZ</span>
+    <span class="nav-link" onclick="showSection('proposal')">PROPOSAL</span>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main id="main-content" style="display:none;">
+
+<!-- MENU SECTION -->
+<section class="section" id="menu-section">
+  <h1 class="section-title"><span class="neon-pink">✦ EXPLORE THE UNIVERSE ✦</span></h1>
+  <div class="menu-grid">
+    <div class="menu-card glass-pink" onclick="showSection('chat')">
+      <span class="menu-emoji">💬</span>
+      <div class="menu-label">Love Chat</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('memories')">
+      <span class="menu-emoji">🌸</span>
+      <div class="menu-label">Memories</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('timeline')">
+      <span class="menu-emoji">⏳</span>
+      <div class="menu-label">Timeline</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('gallery')">
+      <span class="menu-emoji">🖼️</span>
+      <div class="menu-label">Photo Galaxy</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('music')">
+      <span class="menu-emoji">🎵</span>
+      <div class="menu-label">Music & Voice</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('quotes')">
+      <span class="menu-emoji">✍️</span>
+      <div class="menu-label">Love Quotes</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('quiz')">
+      <span class="menu-emoji">🎮</span>
+      <div class="menu-label">Love Quiz</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('proposal')">
+      <span class="menu-emoji">💍</span>
+      <div class="menu-label">Proposal</div>
+    </div>
+    <div class="menu-card glass-pink" onclick="showSection('forever')">
+      <span class="menu-emoji">♾️</span>
+      <div class="menu-label">Forever</div>
+    </div>
+  </div>
+</section>
+
+<!-- LOVE CHAT -->
+<section class="section" id="chat-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <h2 class="section-title"><span class="neon-purple">💬 LOVE CHAT</span></h2>
+    <div class="chat-container glass">
+      <div class="chat-header">
+        <div class="chat-avatar">❤️</div>
+        <div>
+          <div class="chat-name">Love Universe</div>
+          <div class="chat-status">● Online in your heart</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chat-input" placeholder="Type your reply..." rows="1" onkeydown="handleChatKey(event)"></textarea>
+        <button class="chat-send" onclick="sendChatReply()">➤</button>
+      </div>
+    </div>
+    <div class="chat-ending" id="chat-ending">
+      <div class="chat-ending-text">Every Love Story Starts With A Message ❤️</div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMORIES -->
+<section class="section" id="memories-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <h2 class="section-title"><span class="neon-pink">🌸 CUTE MEMORIES</span></h2>
+    <div class="memories-grid">
+      <div class="memory-card glass-pink" style="animation-delay:0s;">
+        <div class="memory-icon">🤳</div>
+        <div class="memory-title">OUR SELFIES</div>
+        <div class="memory-desc">Every captured smile, every stolen glance</div>
+      </div>
+      <div class="memory-card glass-pink" style="animation-delay:.4s;">
+        <div class="memory-icon">😂</div>
+        <div class="memory-title">RANDOM LAUGHS</div>
+        <div class="memory-desc">Those moments that made no sense but felt everything</div>
+      </div>
+      <div class="memory-card glass-pink" style="animation-delay:.8s;">
+        <div class="memory-icon">🎁</div>
+        <div class="memory-title">LITTLE GIFTS</div>
+        <div class="memory-desc">Small surprises that meant the whole world</div>
+      </div>
+      <div class="memory-card glass-pink" style="animation-delay:1.2s;">
+        <div class="memory-icon">🍜</div>
+        <div class="memory-title">FOOD DATES</div>
+        <div class="memory-desc">Sharing plates, stealing bites, stolen smiles</div>
+      </div>
+      <div class="memory-card glass-pink" style="animation-delay:1.6s;">
+        <div class="memory-icon">📞</div>
+        <div class="memory-title">LATE NIGHT CALLS</div>
+        <div class="memory-desc">2 AM conversations that lasted forever</div>
+      </div>
+      <div class="memory-card glass-pink" style="animation-delay:2s;">
+        <div class="memory-icon">✨</div>
+        <div class="memory-title">MAGIC MOMENTS</div>
+        <div class="memory-desc">The universe paused just for us</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="section" id="timeline-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <h2 class="section-title"><span class="neon-blue">⏳ LOVE TIMELINE</span></h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-content glass-pink">
+          <div class="timeline-event">FIRST CHAT 💬</div>
+          <div class="timeline-desc">The message that changed everything. A simple "hi" that opened a new universe.</div>
+        </div>
+        <div class="timeline-dot">💬</div>
+        <div style="width:calc(50% - 40px);"></div>
+      </div>
+      <div class="timeline-item">
+        <div style="width:calc(50% - 40px);"></div>
+        <div class="timeline-dot">📞</div>
+        <div class="timeline-content glass-pink">
+          <div class="timeline-event">FIRST CALL 📞</div>
+          <div class="timeline-desc">Hearing your voice for the first time. Hours felt like seconds.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-content glass-pink">
+          <div class="timeline-event">FIRST MEET 🌸</div>
+          <div class="timeline-desc">When the universe made you real. My heart knew before my mind.</div>
+        </div>
+        <div class="timeline-dot">🌸</div>
+        <div style="width:calc(50% - 40px);"></div>
+      </div>
+      <div class="timeline-item">
+        <div style="width:calc(50% - 40px);"></div>
+        <div class="timeline-dot">📸</div>
+        <div class="timeline-content glass-pink">
+          <div class="timeline-event">FIRST PHOTO 📸</div>
+          <div class="timeline-desc">Frozen in time together. The most precious frame in existence.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-content glass-pink">
+          <div class="timeline-event">FIRST FIGHT 😅</div>
+          <div class="timeline-desc">We broke, we cried, we came back stronger. That's real love.</div>
+        </div>
+        <div class="timeline-dot">😅</div>
+        <div style="width:calc(50% - 40px);"></div>
+      </div>
+      <div class="timeline-item">
+        <div style="width:calc(50% - 40px);"></div>
+        <div class="timeline-dot">❤️</div>
+        <div class="timeline-content glass-pink">
+          <div class="timeline-event">PROPOSAL ❤️</div>
+          <div class="timeline-desc">Three little words that rewrote our entire story forever.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-content glass-pink">
+          <div class="timeline-event">FOREVER ♾️</div>
+          <div class="timeline-desc">Our love story has no ending. It's written in the stars.</div>
+        </div>
+        <div class="timeline-dot">♾️</div>
+        <div style="width:calc(50% - 40px);"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHOTO GALLERY -->
+<section class="section" id="gallery-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <h2 class="section-title"><span class="neon-pink">🖼️ PHOTO GALAXY</span></h2>
+    <div class="gallery-grid">
+      <div class="photo-frame glass" style="animation:floatCard 3s ease-in-out infinite;">
+        <span style="font-size:3rem;">🌅</span>
+        <div class="photo-label">GOLDEN HOUR</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 3.5s ease-in-out infinite;animation-delay:.5s;">
+        <span style="font-size:3rem;">🌙</span>
+        <div class="photo-label">MIDNIGHT</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 4s ease-in-out infinite;animation-delay:1s;">
+        <span style="font-size:3rem;">🌊</span>
+        <div class="photo-label">OCEAN VIBES</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 3.2s ease-in-out infinite;animation-delay:.3s;">
+        <span style="font-size:3rem;">🌸</span>
+        <div class="photo-label">SAKURA</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 3.8s ease-in-out infinite;animation-delay:.8s;">
+        <span style="font-size:3rem;">✨</span>
+        <div class="photo-label">SPARKLE</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 3.4s ease-in-out infinite;animation-delay:1.2s;">
+        <span style="font-size:3rem;">❄️</span>
+        <div class="photo-label">WINTER</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 3.6s ease-in-out infinite;animation-delay:.2s;">
+        <span style="font-size:3rem;">🌺</span>
+        <div class="photo-label">BLOOMING</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 3.3s ease-in-out infinite;animation-delay:.7s;">
+        <span style="font-size:3rem;">🎆</span>
+        <div class="photo-label">FIREWORKS</div>
+      </div>
+      <div class="photo-frame glass" style="animation:floatCard 4.2s ease-in-out infinite;animation-delay:1.4s;">
+        <span style="font-size:3rem;">💫</span>
+        <div class="photo-label">STARDUST</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MUSIC -->
+<section class="section" id="music-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <h2 class="section-title"><span class="neon-purple">🎵 MUSIC & VOICE</span></h2>
+    <div class="music-player glass">
+      <div class="visualizer" id="visualizer">
+        <div class="bar" style="height:50%;"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div>
+      </div>
+      <div class="track-info">
+        <div class="track-name" id="track-name">♾️ Love Theme — Universe</div>
+        <div class="track-artist">Our Song • Playing in my heart</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+      </div>
+      <div class="music-controls">
+        <button class="music-btn" onclick="prevTrack()">⏮</button>
+        <button class="music-btn" id="play-btn" onclick="togglePlay()" style="width:60px;height:60px;background:rgba(255,45,120,0.2);font-size:1.5rem;">▶</button>
+        <button class="music-btn" onclick="nextTrack()">⏭</button>
+      </div>
+      <div style="margin-top:2rem;display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+        <div class="glass-pink" style="padding:1rem;text-align:center;border-radius:12px;cursor:pointer;" onclick="playVoice(1)">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">🎤</div>
+          <div style="font-size:.75rem;font-family:'Orbitron',monospace;letter-spacing:1px;color:rgba(255,255,255,0.7);">VOICE NOTE 1</div>
+        </div>
+        <div class="glass-pink" style="padding:1rem;text-align:center;border-radius:12px;cursor:pointer;" onclick="playVoice(2)">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">💌</div>
+          <div style="font-size:.75rem;font-family:'Orbitron',monospace;letter-spacing:1px;color:rgba(255,255,255,0.7);">VOICE NOTE 2</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTES -->
+<section class="section" id="quotes-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <h2 class="section-title"><span class="neon-pink">✍️ LOVE QUOTES</span></h2>
+    <div class="quotes-display glass" style="padding:2.5rem;">
+      <div class="quote-text" id="quote-text" style="color:var(--neon-pink);"></div>
+      <div class="quote-dots" id="quote-dots"></div>
+      <div class="quote-nav">
+        <button class="quote-btn" onclick="prevQuote()">← PREV</button>
+        <button class="quote-btn" onclick="nextQuote()">NEXT →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="section" id="quiz-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <h2 class="section-title"><span class="neon-purple">🎮 LOVE QUIZ</span></h2>
+    <div class="quiz-container glass" style="padding:2rem;">
+      <div class="quiz-progress" id="quiz-progress"></div>
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <button class="quiz-next" id="quiz-next-btn" onclick="nextQuestion()" style="display:none;">NEXT QUESTION →</button>
+      <div class="compat-meter" id="compat-meter">
+        <div style="font-family:'Orbitron',monospace;font-size:.8rem;letter-spacing:2px;color:rgba(255,255,255,0.6);margin-bottom:1rem;">LOVE COMPATIBILITY</div>
+        <div class="compat-score" id="compat-score">0%</div>
+        <div class="compat-bar"><div class="compat-fill" id="compat-fill"></div></div>
+        <div style="font-family:'Dancing Script',cursive;font-size:1.5rem;color:var(--neon-pink);margin-top:1rem;" id="compat-msg"></div>
+        <button class="quiz-next" onclick="resetQuiz()" style="display:block;margin-top:1rem;">PLAY AGAIN 🔄</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROPOSAL -->
+<section class="section" id="proposal-section" style="display:none;overflow:hidden;position:relative;">
+  <div class="rose-rain" id="rose-rain"></div>
+  <div style="position:relative;z-index:2;text-align:center;">
+    <button class="back-btn" onclick="showSection('menu')" style="margin:0 auto 2rem;">← BACK TO UNIVERSE</button>
+    <span class="proposal-heart">💍</span>
+    <div class="proposal-text">Will You Stay Forever? ❤️</div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;color:rgba(255,255,255,0.6);margin-bottom:2rem;max-width:400px;margin-left:auto;margin-right:auto;">In every universe, across every timeline, I would choose you again and again ✨</div>
+    <div class="proposal-btns">
+      <button class="proposal-btn btn-yes" onclick="proposalYes()">YES ❤️</button>
+      <button class="proposal-btn btn-forever" onclick="proposalYes()">FOREVER ♾️</button>
+    </div>
+    <div id="proposal-response" style="display:none;margin-top:2rem;font-family:'Dancing Script',cursive;font-size:2rem;color:var(--neon-pink);animation:fadeGlow 2s ease-in-out infinite alternate;"></div>
+  </div>
+</section>
+
+<!-- FOREVER -->
+<section class="section" id="forever-section" style="display:none;">
+  <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+    <button class="back-btn" onclick="showSection('menu')">← BACK TO UNIVERSE</button>
+    <div class="souls">
+      <span class="soul" style="filter:drop-shadow(0 0 20px rgba(255,45,120,0.9));">💗</span>
+      <span class="soul-merge" style="font-size:2rem;filter:drop-shadow(0 0 20px rgba(180,79,255,0.9));">✨</span>
+      <span class="soul" style="filter:drop-shadow(0 0 20px rgba(0,212,255,0.9));animation-delay:1s;">💙</span>
+    </div>
+    <div class="forever-text">Our Love Exists<br>Beyond Time ❤️</div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;color:rgba(255,255,255,0.5);max-width:500px;margin:2rem auto;line-height:1.8;">
+      In the infinite space between stars, in the silence between heartbeats, in every dimension and every universe — our love is the one constant. ♾️
+    </div>
+    <div class="infinity">♾️</div>
+    <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">
+      <button class="proposal-btn btn-yes" onclick="showSection('menu')" style="font-size:.8rem;padding:14px 28px;">EXPLORE AGAIN ✦</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ── CURSOR ──
+const cur=document.getElementById('cursor'),curT=document.getElementById('cursor-trail');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+setInterval(()=>{
+  tx+=(mx-tx)*.15;ty+=(my-ty)*.15;
+  curT.style.left=tx+'px';curT.style.top=ty+'px';
+},16);
+document.addEventListener('mousedown',()=>{cur.style.width='30px';cur.style.height='30px';cur.style.background='rgba(255,45,120,0.2)';});
+document.addEventListener('mouseup',()=>{cur.style.width='20px';cur.style.height='20px';cur.style.background='transparent';});
+
+// ── CANVAS BACKGROUND ──
+const canvas=document.getElementById('canvas-bg');
+const ctx2=canvas.getContext('2d');
+let stars=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+function initStars(){
+  stars=[];
+  for(let i=0;i<200;i++){
+    stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+.5,speed:Math.random()*.3+.1,opacity:Math.random(),pulse:Math.random()*Math.PI*2,color:['#ff2d78','#b44fff','#00d4ff','#ffffff'][Math.floor(Math.random()*4)]});
+  }
+}
+initStars();
+let particles2=[];
+function addParticle(){
+  particles2.push({x:Math.random()*canvas.width,y:canvas.height+10,vx:(Math.random()-.5)*.5,vy:-Math.random()-.5,size:Math.random()*3+1,opacity:1,color:Math.random()>.5?'#ff2d78':'#b44fff'});
+}
+function animCanvas(){
+  ctx2.clearRect(0,0,canvas.width,canvas.height);
+  // nebula
+  let grd=ctx2.createRadialGradient(canvas.width*.3,canvas.height*.4,0,canvas.width*.3,canvas.height*.4,canvas.width*.6);
+  grd.addColorStop(0,'rgba(180,79,255,0.04)');grd.addColorStop(1,'transparent');
+  ctx2.fillStyle=grd;ctx2.fillRect(0,0,canvas.width,canvas.height);
+  let grd2=ctx2.createRadialGradient(canvas.width*.7,canvas.height*.6,0,canvas.width*.7,canvas.height*.6,canvas.width*.5);
+  grd2.addColorStop(0,'rgba(255,45,120,0.04)');grd2.addColorStop(1,'transparent');
+  ctx2.fillStyle=grd2;ctx2.fillRect(0,0,canvas.width,canvas.height);
+  // stars
+  stars.forEach(s=>{
+    s.pulse+=0.02;
+    let op=s.opacity*(.5+.5*Math.sin(s.pulse));
+    ctx2.beginPath();ctx2.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx2.fillStyle=s.color.replace(')',`,${op})`).replace('rgb','rgba');
+    if(s.color==='#ffffff')ctx2.fillStyle=`rgba(255,255,255,${op})`;
+    else if(s.color==='#ff2d78')ctx2.fillStyle=`rgba(255,45,120,${op})`;
+    else if(s.color==='#b44fff')ctx2.fillStyle=`rgba(180,79,255,${op})`;
+    else ctx2.fillStyle=`rgba(0,212,255,${op})`;
+    ctx2.fill();
+    s.y-=s.speed*.2;
+    if(s.y<-5)s.y=canvas.height+5;
+  });
+  // floating particles
+  if(Math.random()<.05)addParticle();
+  particles2=particles2.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.opacity-=.005;
+    if(p.opacity<=0)return false;
+    ctx2.beginPath();ctx2.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx2.fillStyle=p.color==='#ff2d78'?`rgba(255,45,120,${p.opacity})`:`rgba(180,79,255,${p.opacity})`;
+    ctx2.fill();return true;
+  });
+  requestAnimationFrame(animCanvas);
+}
+animCanvas();
+
+// ── INTRO ──
+function enterUniverse(){
+  const intro=document.getElementById('intro');
+  intro.classList.add('fade-out');
+  setTimeout(()=>{
+    intro.style.display='none';
+    document.getElementById('main-content').style.display='block';
+    document.getElementById('nav').classList.add('visible');
+    showSection('menu');
+  },1500);
+}
+
+// ── SECTIONS ──
+const sections=['menu','chat','memories','timeline','gallery','music','quotes','quiz','proposal','forever'];
+function showSection(id){
+  sections.forEach(s=>{
+    const el=document.getElementById(s+'-section');
+    if(el)el.style.display='none';
+  });
+  const target=document.getElementById(id+'-section');
+  if(target){
+    target.style.display='flex';
+    target.style.animation='slideDown .5s ease';
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(id==='chat')initChat();
+    if(id==='quotes')initQuotes();
+    if(id==='quiz')initQuiz();
+    if(id==='proposal')initProposal();
+  }
+}
+
+// ── CHAT ──
+const chatQs=[
+  {q:"First msg nyabagam irukka? ❤️",emoji:"💌"},
+  {q:"Who fell first? 😏",emoji:"😍"},
+  {q:"Most cute memory enna? ✨",emoji:"🌸"},
+  {q:"First impression pathi sollu! 👀",emoji:"💭"},
+  {q:"Late night calls ah texts ah? 🌙",emoji:"📱"},
+  {q:"Most missed moment? 🥺",emoji:"💔"},
+  {q:"Favorite nickname enna? 🥰",emoji:"💕"},
+  {q:"Most emotional moment? 😢",emoji:"💧"},
+  {q:"One word about your love? ❤️",emoji:"✨"},
+  {q:"Forever together ah? 🥺",emoji:"♾️"}
+];
+let chatIndex=0,chatActive=false;
+function initChat(){
+  if(chatActive)return;
+  chatActive=true;chatIndex=0;
+  document.getElementById('chat-messages').innerHTML='';
+  document.getElementById('chat-ending').style.display='none';
+  setTimeout(()=>addIncomingMsg(chatQs[0].q,chatQs[0].emoji),800);
+}
+function addIncomingMsg(text,emoji=''){
+  const msgs=document.getElementById('chat-messages');
+  const typing=document.createElement('div');
+  typing.className='typing-indicator';
+  typing.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  msgs.appendChild(typing);
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    msgs.removeChild(typing);
+    const div=document.createElement('div');div.className='msg incoming';
+    div.innerHTML=`<div class="msg-bubble">${text}</div><div class="msg-time">just now</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop=msgs.scrollHeight;
+    spawnHearts();
+  },1200);
+}
+function sendChatReply(){
+  const inp=document.getElementById('chat-input');
+  const val=inp.value.trim();
+  if(!val)return;
+  const msgs=document.getElementById('chat-messages');
+  const div=document.createElement('div');div.className='msg outgoing';
+  div.innerHTML=`<div class="msg-bubble">${val}</div><div class="msg-time">just now ✓✓</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  inp.value='';chatIndex++;
+  if(chatIndex<chatQs.length){
+    setTimeout(()=>addIncomingMsg(chatQs[chatIndex].q,chatQs[chatIndex].emoji),1500);
+  } else {
+    setTimeout(()=>{
+      addIncomingMsg("Every Love Story Starts With A Message ❤️ Thank you for sharing yours ✨");
+      document.getElementById('chat-ending').style.display='block';
+    },2000);
+  }
+}
+function handleChatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatReply();}}
+function spawnHearts(){
+  for(let i=0;i<5;i++){
+    setTimeout(()=>{
+      const h=document.createElement('div');
+      h.style.cssText=`position:fixed;left:${Math.random()*100}vw;bottom:20%;font-size:${Math.random()*20+10}px;pointer-events:none;z-index:200;animation:particleDrift 2s ease-out forwards;--drift:${(Math.random()-.5)*100}px;`;
+      h.textContent=['❤️','💕','💗','💖','✨'][Math.floor(Math.random()*5)];
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(),2000);
+    },i*200);
+  }
+}
+
+// ── QUOTES ──
+const quotes=[
+  {text:"Unna paatha aprm than life colorful ah iruku ❤️",author:"— Tamil Love"},
+  {text:"Every memory with you feels like magic ✨",author:"— Our Story"},
+  {text:"You are my favorite notification 💬",author:"— Digital Love"},
+  {text:"In your eyes I found my universe 🌌",author:"— Cosmic Love"},
+  {text:"Distance means nothing when someone means everything ♾️",author:"— Always"},
+  {text:"You're the reason I smile at my phone 📱",author:"— Modern Love"},
+  {text:"With you, every ordinary moment becomes extraordinary ✨",author:"— Forever Us"},
+  {text:"You're not just my love, you're my home 🏠",author:"— Safe Place"},
+  {text:"Every love story is beautiful, but ours is my favorite ❤️",author:"— Our Universe"}
+];
+let qIdx=0;
+function initQuotes(){setQuote();}
+function setQuote(){
+  const el=document.getElementById('quote-text');
+  el.style.opacity=0;
+  setTimeout(()=>{
+    el.innerHTML=`<span style="color:var(--neon-pink);">"${quotes[qIdx].text}"</span><br><small style="font-family:'Rajdhani';font-size:1rem;color:rgba(255,255,255,0.4);">${quotes[qIdx].author}</small>`;
+    el.style.transition='opacity .5s';el.style.opacity=1;
+    const dots=document.getElementById('quote-dots');dots.innerHTML='';
+    quotes.forEach((_,i)=>{
+      const d=document.createElement('div');d.className='q-dot'+(i===qIdx?' active':'');
+      d.onclick=()=>{qIdx=i;setQuote();};dots.appendChild(d);
+    });
+  },300);
+}
+function nextQuote(){qIdx=(qIdx+1)%quotes.length;setQuote();}
+function prevQuote(){qIdx=(qIdx-1+quotes.length)%quotes.length;setQuote();}
+
+// ── QUIZ ──
+const quizQs=[
+  {q:"Who says sorry first? 🥺",opts:["Me always 😅","You always","Both together 🤝","Nobody lol 😂"]},
+  {q:"Who replies late? 😂",opts:["I do, sorry 🙈","You do!!","Both lazy 😴","We're both fast ⚡"]},
+  {q:"Most possessive one? 👀",opts:["Definitely me","Definitely you","Both equally","Neither of us"]},
+  {q:"Most dramatic one? 😅",opts:["Me, main character","You, obviously","Both dramatic","Literally neither"]},
+  {q:"Who sends more good morning texts? ☀️",opts:["Me every day","You do","Both at same time","We forget lol"]},
+];
+let qzIdx=0,qzAnswers=[];
+function initQuiz(){
+  qzIdx=0;qzAnswers=[];
+  document.getElementById('compat-meter').style.display='none';
+  document.getElementById('quiz-next-btn').style.display='none';
+  renderQuestion();
+}
+function renderQuestion(){
+  if(qzIdx>=quizQs.length){showResult();return;}
+  const q=quizQs[qzIdx];
+  document.getElementById('quiz-question').textContent=q.q;
+  const prog=document.getElementById('quiz-progress');prog.innerHTML='';
+  quizQs.forEach((_,i)=>{const s=document.createElement('div');s.className='q-step'+(i<qzIdx?' done':'');prog.appendChild(s);});
+  const opts=document.getElementById('quiz-options');opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('div');b.className='quiz-option glass';
+    b.style.borderColor='rgba(255,255,255,0.1)';
+    b.innerHTML=`<span style="font-size:.9rem;">${o}</span>`;
+    b.onclick=()=>{
+      opts.querySelectorAll('.quiz-option').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');qzAnswers[qzIdx]=i;
+      document.getElementById('quiz-next-btn').style.display='block';
+    };
+    opts.appendChild(b);
+  });
+}
+function nextQuestion(){
+  if(qzAnswers[qzIdx]===undefined)return;
+  qzIdx++;document.getElementById('quiz-next-btn').style.display='none';
+  renderQuestion();
+}
+function showResult(){
+  const score=Math.floor(Math.random()*20+80);
+  document.getElementById('quiz-question').textContent='';
+  document.getElementById('quiz-options').innerHTML='';
+  document.getElementById('quiz-next-btn').style.display='none';
+  const meter=document.getElementById('compat-meter');meter.style.display='block';
+  document.getElementById('compat-score').textContent=score+'%';
+  setTimeout(()=>document.getElementById('compat-fill').style.width=score+'%',300);
+  const msgs=["Made for each other! ❤️","Soul twins! ✨","Perfectly matched! 💕","Cosmic love! 🌌"];
+  document.getElementById('compat-msg').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  spawnHearts();
+}
+function resetQuiz(){initQuiz();}
+
+// ── PROPOSAL ──
+function initProposal(){
+  document.getElementById('proposal-response').style.display='none';
+  const rain=document.getElementById('rose-rain');rain.innerHTML='';
+  for(let i=0;i<20;i++){
+    const r=document.createElement('div');r.className='rose';
+    r.style.left=Math.random()*100+'%';
+    r.style.animationDuration=(Math.random()*4+3)+'s';
+    r.style.animationDelay=Math.random()*5+'s';
+    r.textContent=['🌹','🌸','💐','🌺','💮'][Math.floor(Math.random()*5)];
+    rain.appendChild(r);
+  }
+}
+function proposalYes(){
+  const resp=document.getElementById('proposal-response');
+  resp.textContent="You said YES! Now we're written in the stars forever ❤️✨";
+  resp.style.display='block';
+  for(let i=0;i<30;i++)setTimeout(spawnHearts,i*100);
+  setTimeout(()=>showSection('forever'),3000);
+}
+
+// ── MUSIC ──
+const tracks=["♾️ Love Theme — Universe","💕 Starlight Serenade","🌙 Midnight Dreams","✨ Cosmic Romance","❤️ Forever Always"];
+let tIdx=0,playing=false;
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('play-btn').textContent=playing?'⏸':'▶';
+  const bars=document.querySelectorAll('.bar');
+  bars.forEach(b=>b.style.animationPlayState=playing?'running':'paused');
+}
+function nextTrack(){tIdx=(tIdx+1)%tracks.length;document.getElementById('track-name').textContent=tracks[tIdx];document.getElementById('prog-fill').style.animation='none';setTimeout(()=>{document.getElementById('prog-fill').style.animation='progressPlay 30s linear infinite';},50);}
+function prevTrack(){tIdx=(tIdx-1+tracks.length)%tracks.length;document.getElementById('track-name').textContent=tracks[tIdx];}
+function playVoice(n){spawnHearts();alert('Voice Note '+n+' playing in your heart 💕');}
+</script>
+</body>
+</html>
